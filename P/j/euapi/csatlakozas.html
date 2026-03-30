@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EU országok csatlakozása</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #003399;
+            min-height: 100vh;
+            padding: 30px;
+        }
+        nav {
+            background: #FFCC00;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        nav a {
+            color: #003399;
+            font-weight: bold;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        nav a:hover { text-decoration: underline; }
+        h1 {
+            color: #FFCC00;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        #evek {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        #evek button {
+            background: #FFCC00;
+            color: #003399;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #evek button:hover, #evek button.active {
+            background: #fff;
+        }
+        #szamlalo {
+            color: #FFCC00;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        table {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 4px solid #FFCC00;
+        }
+        th {
+            background: #FFCC00;
+            color: #003399;
+            padding: 12px;
+        }
+        td {
+            padding: 10px;
+            text-align: center;
+            color: #003399;
+            border-bottom: 1px solid #ddd;
+        }
+        td img {
+            width: 60px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html">EU Országok</a> |
+        <a href="csatlakozas.html">EU Országok csatlakozás szerint.</a>
+    </nav>
+    <h1>EU országok csatlakozása</h1>
+    <div id="evek"></div>
+    <p id="szamlalo"></p>
+    <table>
+        <thead>
+            <tr>
+                <th>Zászló</th>
+                <th>Ország</th>
+                <th>Főváros</th>
+                <th>Pénznem</th>
+            </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+    </table>
+
+    <script>
+        const API = 'https://info.nytta.hu/web/api/eu/?orszag=mind';
+        let orszagok = [];
+
+        fetch(API)
+            .then(res => res.json())
+            .then(data => {
+                orszagok = data;
+                const evek = [...new Set(data.map(o => o.mikor))].sort();
+                const evekDiv = document.getElementById('evek');
+                evek.forEach(ev => {
+                    const btn = document.createElement('button');
+                    btn.textContent = ev;
+                    btn.onclick = () => szures(ev);
+                    evekDiv.appendChild(btn);
+                });
+            });
+
+        function szures(ev) {
+            document.querySelectorAll('#evek button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const szurt = orszagok.filter(o => o.mikor === ev);
+            document.getElementById('szamlalo').textContent = `${ev}-ben/-ban csatlakozott: ${szurt.length} ország`;
+            
+            const tbody = document.getElementById('tbody');
+            tbody.innerHTML = '';
+            szurt.forEach(o => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><img src="${o.zaszlo}" alt="${o.orszag}"></td>
+                        <td>${o.orszag}</td>
+                        <td>${o.fovaros}</td>
+                        <td>${o.penz} (${o.rpenz})</td>
+                    </tr>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>

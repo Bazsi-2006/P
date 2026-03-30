@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body { text-align: center; }
+        #tree { display: inline-block; text-align: left; }
+        #controls { margin: 20px; }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <label for="height">Magasság: </label>
+        <input type="range" id="height" min="1" max="100" value="1">
+        <br>
+        <button id="star">Csillag</button>
+        <button id="plus">Plussz</button>
+        <button id="circle">Kör</button>
+        <br>
+        <label for="colorPicker">Szín: </label>
+        <input type="color" id="colorPicker" value="#00ff00">
+    </div>
+    <pre id="tree"></pre>
+</body>
+<script>
+    let currentHeight = 5;
+    let currentChar = '*';
+
+    function drawTree(height, char) {
+        let tree = '';
+        for (let i = 1; i <= height; i++) {
+            let spaces = ' '.repeat(height - i);
+            let chars = char.repeat(2 * i - 1);
+            tree += spaces + chars + '\n';
+        }
+        let trunkSpaces = ' '.repeat(height - 1);
+        tree += trunkSpaces + '|' + '\n';
+        return tree;
+    }
+
+    function updateTree() {
+        document.getElementById('tree').textContent = drawTree(currentHeight, currentChar);
+    }
+
+    document.getElementById('height').addEventListener('input', function() {
+        currentHeight = parseInt(this.value);
+        updateTree();
+    });
+
+    document.getElementById('star').addEventListener('click', function() {
+        currentChar = '*';
+        updateTree();
+    });
+
+    document.getElementById('plus').addEventListener('click', function() {
+        currentChar = '+';
+        updateTree();
+    });
+
+    document.getElementById('circle').addEventListener('click', function() {
+        currentChar = 'o';
+        updateTree();
+    });
+
+    document.getElementById('colorPicker').addEventListener('input', function() {
+        document.getElementById('tree').style.color = this.value;
+    });
+
+    updateTree();
+</script>
+</html>

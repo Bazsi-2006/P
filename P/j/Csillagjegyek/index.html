@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Csillagjegyek</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        h2 { margin-top: 0; }
+        select, input, button {
+            padding: 8px;
+            font-size: 16px;
+            margin: 5px;
+        }
+        #jegyInfo, #datumInfo {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        img { max-width: 150px; margin: 10px 0; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>Csillagjegyek</h1>
+
+    <div class="section">
+        <h2>Válassz csillagjegyet</h2>
+        <select id="jegySelect">
+            <option value="">-- Válassz --</option>
+        </select>
+        <div id="jegyInfo" class="hidden"></div>
+    </div>
+
+    <div class="section">
+        <h2>Dátum alapján</h2>
+        <label>Dátum: <input type="date" id="datumInput"></label>
+        <button id="datumBtn">Keresés</button>
+        <div id="datumInfo" class="hidden"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://info.nytta.hu/web/api/csillagjegyek/';
+
+        async function betoltJegyek() {
+            const res = await fetch(API_BASE + '?jegy=mind');
+            const jegyek = await res.json();
+            const select = document.getElementById('jegySelect');
+            
+            jegyek.forEach((jegy, i) => {
+                const option = document.createElement('option');
+                option.value = i + 1;
+                option.textContent = jegy.jegy;
+                select.appendChild(option);
+            });
+        }
+
+        function megjelenitJegy(adat, targetId) {
+            const div = document.getElementById(targetId);
+            div.classList.remove('hidden');
+            div.innerHTML = `
+                <img src="${adat.kep}" alt="${adat.jegy}">
+                <h3>${adat.jegy}</h3>
+                <p><strong>Időszak:</strong> ${adat.kho}.${adat.knap} - ${adat.vho}.${adat.vnap}</p>
+                <p><strong>Elem:</strong> ${adat.elem}</p>
+                <p><strong>Minőség:</strong> ${adat.minoseg}</p>
+                <p><strong>Mozgás:</strong> ${adat.mozgas}</p>
+                <p><strong>Kulcsszavak:</strong> ${adat.kulcsszavak}</p>
+            `;
+        }
+
+        document.getElementById('jegySelect').addEventListener('change', async (e) => {
+            if (!e.target.value) {
+                document.getElementById('jegyInfo').classList.add('hidden');
+                return;
+            }
+            const res = await fetch(API_BASE + '?jegy=' + e.target.value);
+            const adat = await res.json();
+            megjelenitJegy(adat, 'jegyInfo');
+        });
+
+        document.getElementById('datumBtn').addEventListener('click', async () => {
+            var datum = document.getElementById('datumInput').value;
+            if (!datum) return;
+            var [ev, ho, nap] = datum.split('-');
+            var res = await fetch(API_BASE + '?ho=' + parseInt(ho) + '&nap=' + parseInt(nap));
+            var adat = await res.json();
+            megjelenitJegy(adat, 'datumInfo');
+        });
+
+        betoltJegyek();
+        var ma = new Date();
+        document.getElementById('datumInput').max = ma.toISOString().split('T')[0];
+        var minDatum = new Date(ma.getFullYear() - 100, ma.getMonth(), ma.getDate());
+        document.getElementById('datumInput').min = minDatum.toISOString().split('T')[0];
+        
+    </script>
+</body>
+</html>

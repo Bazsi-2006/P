@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EU Országok</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #003399;
+            min-height: 100vh;
+            padding: 30px;
+        }
+        nav {
+            background: #FFCC00;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        nav a {
+            color: #003399;
+            font-weight: bold;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        nav a:hover { text-decoration: underline; }
+        h1 {
+            color: #FFCC00;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        #zaszlok {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+        #zaszlok img {
+            width: 90px;
+            height: 60px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 3px solid #FFCC00;
+            border-radius: 6px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        #zaszlok img:hover {
+            transform: scale(1.1);
+            border-color: #fff;
+        }
+        #info {
+            display: none;
+            max-width: 500px;
+            margin: 30px auto 0;
+            background: #fff;
+            color: #003399;
+            padding: 20px;
+            border-radius: 10px;
+            border: 4px solid #FFCC00;
+        }
+        #info h2 {
+            color: #003399;
+            border-bottom: 2px solid #FFCC00;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        #info p { margin: 8px 0; }
+        #info b { color: #003399; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html">EU Országok</a> |
+        <a href="csatlakozas.html">EU Országok csatlakozás szerint.</a>
+    </nav>
+    <h1>EU Tagállamok</h1>
+    <div id="zaszlok"></div>
+    <div id="info"></div>
+    <script>
+        const API = 'https://info.nytta.hu/web/api/eu/?orszag=mind';
+        let orszagok = [];
+
+        fetch(API)
+            .then(res => res.json())
+            .then(data => {
+                orszagok = data;
+                const container = document.getElementById('zaszlok');
+                data.forEach(o => {
+                    const img = document.createElement('img');
+                    img.src = o.zaszlo;
+                    img.alt = o.orszag;
+                    img.onclick = () => mutasd(o.oID);
+                    container.appendChild(img);
+                });
+            });
+
+        function mutasd(oID) {
+            const o = orszagok.find(x => x.oID === oID);
+            const info = document.getElementById('info');
+            info.style.display = 'block';
+            info.innerHTML = `
+                <h2>${o.orszag}</h2>
+                <p><b>Főváros:</b> ${o.fovaros}</p>
+                <p><b>Csatlakozás:</b> ${o.mikor}</p>
+                <p><b>Nyelv:</b> ${o.nyelv}</p>
+                <p><b>Pénznem:</b> ${o.penz} (${o.rpenz})</p>
+                <p><b>Egyéb:</b> ${o.egyeb}</p>
+            `;
+        }
+    </script>
+</body>
+</html>
